@@ -1,20 +1,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include "sorting.h"
 #include "stack.h"
 
-static void sorted_insertion(void *p_container, int element)
+static void sorted_insert(void *p_container, int element)
 {
-    if (is_empty_stack(p_container) || element <= top_stack(p_container)) 
+ 
+    if (is_empty_stack(p_container) || element >= top_stack(p_container))
     {
         push_back_stack(p_container, element);
         return;
     }
 
-    int temp = top_stack(p_container); 
+
+    int temp = top_stack(p_container);
     pop_back_stack(p_container);
 
-    sorted_insertion(p_container, element); 
+    sorted_insert(p_container, element);
 
     push_back_stack(p_container, temp);
 }
@@ -27,12 +30,12 @@ void insertion_sort(void *p_container)
     if (get_size_stack(p_container) <= 1)
         return;
 
-    int top = top_stack(p_container); 
+    int top = top_stack(p_container);
     pop_back_stack(p_container);
 
-    insertion_sort(p_container); 
+    insertion_sort(p_container);
 
-    sorted_insertion(p_container, top); 
+    sorted_insert(p_container, top);
 }
 
 static void *merge_two_stacks(void *left, void *right)
@@ -42,7 +45,7 @@ static void *merge_two_stacks(void *left, void *right)
 
     while (!is_empty_stack(left) && !is_empty_stack(right))
     {
-        if (top_stack(left) <= top_stack(right)) 
+        if (top_stack(left) <= top_stack(right))
         {
             push_back_stack(temp, top_stack(left));
             pop_back_stack(left);
@@ -66,13 +69,13 @@ static void *merge_two_stacks(void *left, void *right)
         pop_back_stack(right);
     }
 
-
-    while (!is_empty_stack(temp)) 
+    while (!is_empty_stack(temp))
     {
         push_back_stack(result, top_stack(temp));
         pop_back_stack(temp);
     }
 
+    free_stack(temp);
     return result;
 }
 
@@ -95,9 +98,7 @@ static void split_stack(void *p_container, void *left, void *right)
         pop_back_stack(temp);
     }
 
-
-    int remaining = get_size_stack(temp); 
-    for (int i = 0; i < remaining; i++) 
+    while (!is_empty_stack(temp))
     {
         push_back_stack(right, top_stack(temp));
         pop_back_stack(temp);
@@ -105,6 +106,7 @@ static void split_stack(void *p_container, void *left, void *right)
 
     free_stack(temp);
 }
+
 void merge_sort(void *p_container)
 {
     if (p_container == NULL)
@@ -118,8 +120,9 @@ void merge_sort(void *p_container)
     void *right = create_stack();
 
     split_stack(p_container, left, right);
-    merge_sort(left); 
-    merge_sort(right); 
+
+    merge_sort(left);
+    merge_sort(right);
 
     void *merged = merge_two_stacks(left, right);
 
@@ -128,6 +131,9 @@ void merge_sort(void *p_container)
         push_back_stack(p_container, top_stack(merged));
         pop_back_stack(merged);
     }
+
+    free_stack(left);
+    free_stack(right);
     free_stack(merged);
 }
 
@@ -139,12 +145,14 @@ void benchmark_sorts(int max_size, int step)
 
     for (int size = step; size <= max_size; size += step)
     {
+     
         int *test_data = (int *)malloc(size * sizeof(int));
         for (int i = 0; i < size; i++)
         {
             test_data[i] = rand() % 10000;
         }
 
+        
         void *stack1 = create_stack();
         for (int i = 0; i < size; i++)
         {
@@ -152,7 +160,7 @@ void benchmark_sorts(int max_size, int step)
         }
 
         clock_t start = clock();
-        insertion_sort(stack1); 
+        insertion_sort(stack1);
         clock_t end = clock();
         double time_insertion = ((double)(end - start) * 1000) / CLOCKS_PER_SEC;
         free_stack(stack1);
