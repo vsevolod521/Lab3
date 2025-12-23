@@ -2,21 +2,22 @@
 #include <stdlib.h>
 #include <time.h>
 #include "stack.h"
+#include "locale.h"
 
 void insertion_sort(void *p_container);
 void merge_sort(void *p_container);
 
 int main()
 {
-    srand(time(NULL));
+    setlocale(LC_ALL, "ru_RU.UTF-8");
 
     void *stack = create_stack();
     int test_data[] = {64, 34, 25, 12, 22, 11, 90};
     int size = sizeof(test_data) / sizeof(test_data[0]);
 
-    printf("РЎРѕСЂС‚РёСЂРѕРІРєР° РІСЃС‚Р°РІРєР°РјРё\n");
+    printf("Сортировка вставками\n");
     insertion_sort(stack);
-    printf("Р РµР·СѓР»СЊС‚Р°С‚: ");
+    printf("Результат: ");
     print_stack(stack);
 
     free_stack(stack);
@@ -26,9 +27,9 @@ int main()
         push_back_stack(stack, test_data[i]);
     }
 
-    printf("РЎРѕСЂС‚РёСЂРѕРІРєР° СЃР»РёСЏРЅРёРµРј\n");
+    printf("Сортировка слиянием\n");
     merge_sort(stack);
-    printf("Р РµР·СѓР»СЊС‚Р°С‚: ");
+    printf("Результат: ");
     print_stack(stack);
 
     free_stack(stack);
