@@ -19,7 +19,7 @@ sorting.o: sorting.c sorting.h stack.h
 	$(CC) $(CFLAGS) -c sorting.c
 
 clean:
-	del /f $(OBJECTS) $(TARGET) *.txt
+	rm -f $(OBJECTS) $(TARGET) *.txt
 
 run: $(TARGET)
 	./$(TARGET)

@@ -1,37 +1,170 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "stack.h"
-#include "locale.h"
+#include "sorting.h"
+#include <locale.h>
 
-void insertion_sort(void *p_container);
-void merge_sort(void *p_container);
-
-int main()
+int main(int argc, char *argv[])
 {
-    setlocale(LC_ALL, "ru_RU.UTF-8");
+    setlocale(LC_ALL, "ru_Ru.UTF-8");
+    srand(time(NULL));
 
-    void *stack = create_stack();
-    int test_data[] = {64, 34, 25, 12, 22, 11, 90};
-    int size = sizeof(test_data) / sizeof(test_data[0]);
-
-    printf("Сортировка вставками\n");
-    insertion_sort(stack);
-    printf("Результат: ");
-    print_stack(stack);
-
-    free_stack(stack);
-    stack = create_stack();
-    for (int i = 0; i < size; i++)
+    char *input_file = NULL;
+    for (int i = 1; i < argc; i++)
     {
-        push_back_stack(stack, test_data[i]);
+        if (strcmp(argv[i], "-file") == 0 && i + 1 < argc)
+        {
+            input_file = argv[i + 1];
+            break;
+        }
     }
 
-    printf("Сортировка слиянием\n");
-    merge_sort(stack);
-    printf("Результат: ");
+    if (input_file != NULL)
+    {
+        void *previous_stack = load_stack_from_file(input_file);
+        if (previous_stack != NULL && !is_empty_stack(previous_stack))
+        {
+            printf("Предыдущий введйнный ряж из файла '%s'\n", input_file);
+            print_stack(previous_stack);
+
+            void *sorted_copy = create_stack();
+            void *temp = create_stack();
+
+            while (!is_empty_stack(previous_stack))
+            {
+                int val = top_stack(previous_stack);
+                pop_back_stack(previous_stack);
+                push_back_stack(temp, val);
+            }
+
+            while (!is_empty_stack(temp))
+            {
+                int val = top_stack(temp);
+                pop_back_stack(temp);
+                push_back_stack(previous_stack, val);
+                push_back_stack(sorted_copy, val);
+            }
+            free_stack(temp);
+
+            insertion_sort(sorted_copy);
+
+            printf("\nОтсортированный (прямым включением)\n");
+            print_stack(sorted_copy);
+
+            free_stack(previous_stack);
+            free_stack(sorted_copy);
+        }
+        else
+        {
+            printf("Файл '%s' не найден или пуст.\n", input_file);
+        }
+        printf("\n");
+    }
+
+    puts("Введите новый ряд чисел:");
+
+    void *stack = create_stack();
+    char input[1000];
+
+    if (fgets(input, sizeof(input), stdin) != NULL)
+    {
+        char *token = strtok(input, " \t\n");
+        int count = 0;
+
+        while (token != NULL)
+        {
+            int number = atoi(token);
+            if (token[0] != '0' || number != 0 || strcmp(token, "0") == 0)
+            {
+                push_back_stack(stack, number);
+                count++;
+            }
+            token = strtok(NULL, " \t\n");
+        }
+
+        if (count == 0)
+        {
+            printf("Числа не введены, демонстрационный вариант вывода:\n");
+            push_back_stack(stack, 34);
+            push_back_stack(stack, 12);
+            push_back_stack(stack, 78);
+            push_back_stack(stack, 5);
+            push_back_stack(stack, 91);
+            push_back_stack(stack, 23);
+        }
+    }
+
+    printf("\nНовый ряд чисел:\n");
     print_stack(stack);
 
+    save_stack_to_file(stack, "input.txt");
+
+    void *insertion_stack = create_stack();
+    void *merge_stack = create_stack();
+
+    void *temp = create_stack();
+    while (!is_empty_stack(stack))
+    {
+        int val = top_stack(stack);
+        pop_back_stack(stack);
+        push_back_stack(temp, val);
+    }
+
+    while (!is_empty_stack(temp))
+    {
+        int val = top_stack(temp);
+        pop_back_stack(temp);
+        push_back_stack(stack, val);
+        push_back_stack(insertion_stack, val);
+        push_back_stack(merge_stack, val);
+    }
+    free_stack(temp);
+
+    printf("\nСортировка прямым включением\n");
+    insertion_sort(insertion_stack);
+    print_stack(insertion_stack);
+    save_stack_to_file(insertion_stack, "sorted.txt");
+
+    printf("Сравнение производительности алгоритмов\n");
+
+    char answer;
+    printf("Запустить тест производительности на разных объемах данных? (y/n): ");
+    scanf(" %c", &answer);
+
+    if (answer == 'y' || answer == 'Y')
+    {
+        benchmark_sorts(1000, 100);
+    }
+
+    printf("Создать тестовые файлы? (y/n): ");
+    scanf(" %c", &answer);
+
+    if (answer == 'y' || answer == 'Y')
+    {
+        for (int size = 100; size <= 1000; size += 100)
+        {
+            char filename[20];
+            sprintf(filename, "test_%d.txt", size);
+
+            FILE *file = fopen(filename, "w");
+            if (file != NULL)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    fprintf(file, "%d ", rand() % 10000);
+                }
+                fprintf(file, "\n");
+                fclose(file);
+                printf("Создан файл: %s\n", filename);
+            }
+        }
+        printf("\nГотово\n");
+    }
+
     free_stack(stack);
+    free_stack(insertion_stack);
+    free_stack(merge_stack);
     return 0;
 }

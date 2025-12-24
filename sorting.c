@@ -141,7 +141,7 @@ void benchmark_sorts(int max_size, int step)
 {
     srand(12345); 
 
-    printf("Размер данных;Insertion Sort (мс);Merge Sort (мс)\n");
+    printf("Размер данных\tInsertion Sort (мс)\tMerge Sort (мс)\n");
 
     for (int size = step; size <= max_size; size += step)
     {
@@ -171,14 +171,13 @@ void benchmark_sorts(int max_size, int step)
             push_back_stack(stack2, test_data[i]);
         }
 
-        start = clock();
+        clock_t start2 = clock();
         merge_sort(stack2);
-        end = clock();
-        double time_merge = ((double)(end - start) * 1000) / CLOCKS_PER_SEC;
+        clock_t end2 = clock();
+        double time_merge = ((double)(end2 - start2) * 1000) / CLOCKS_PER_SEC;
         free_stack(stack2);
 
-        printf("%d;%.3f;%.3f\n", size, time_insertion, time_merge);
-
+        printf("%d\t%.3f\t%.3f\n", size, time_insertion, time_merge);
         free(test_data);
     }
 }
