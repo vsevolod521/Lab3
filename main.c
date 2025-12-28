@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         void *previous_stack = load_stack_from_file(input_file);
         if (previous_stack != NULL && !is_empty_stack(previous_stack))
         {
-            printf("Предыдущий введйнный ряж из файла '%s'\n", input_file);
+            printf("РїСЂРµРґС‹РґСѓС‰РёР№ РІРІРµРґС‘РЅРЅС‹Р№ СЂСЏРґ '%s'\n", input_file);
             print_stack(previous_stack);
 
             void *sorted_copy = create_stack();
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
             insertion_sort(sorted_copy);
 
-            printf("\nОтсортированный (прямым включением)\n");
+            printf("\n РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅРЅС‹Р№ СЂСЏРґ (РїСЂСЏРјС‹Рј РІРєР»СЋС‡РµРЅРёРµРј) \n");
             print_stack(sorted_copy);
 
             free_stack(previous_stack);
@@ -58,12 +58,12 @@ int main(int argc, char *argv[])
         }
         else
         {
-            printf("Файл '%s' не найден или пуст.\n", input_file);
+            printf("С„Р°Р№Р» '%s' РЅРµ РЅР°Р№РґРµРЅ РёР»Рё РїСѓСЃС‚\n", input_file);
         }
         printf("\n");
     }
 
-    puts("Введите новый ряд чисел:");
+    puts("РІРІРµРґРёС‚Рµ СЂСЏРґ С‡РёСЃРµР»:");
 
     void *stack = create_stack();
     char input[1000];
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
         if (count == 0)
         {
-            printf("Числа не введены, демонстрационный вариант вывода:\n");
+            printf("РІС‹ РЅРµ РІРІРµР»Рё РІСЃРµ С‡РёСЃР»Р°. РёСЃРїРѕР»СЊР·СѓРµРј С‚РµСЃС‚РѕРІС‹Р№ РЅР°Р±РѕСЂ:\n");
             push_back_stack(stack, 34);
             push_back_stack(stack, 12);
             push_back_stack(stack, 78);
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("\nНовый ряд чисел:\n");
+    printf("\nРЅРѕРІС‹Р№ СЂСЏРґ С‡РёСЃРµР»:\n");
     print_stack(stack);
 
     save_stack_to_file(stack, "input.txt");
@@ -122,23 +122,23 @@ int main(int argc, char *argv[])
     }
     free_stack(temp);
 
-    printf("\nСортировка прямым включением\n");
+    printf("\nСЃРѕСЂС‚РёСЂРѕРІРєР° РїСЂСЏРјС‹Рј РІРєР»СЋС‡РµРЅРёРµРј\n");
     insertion_sort(insertion_stack);
     print_stack(insertion_stack);
     save_stack_to_file(insertion_stack, "sorted.txt");
 
-    printf("Сравнение производительности алгоритмов\n");
+    printf("\n");
 
     char answer;
-    printf("Запустить тест производительности на разных объемах данных? (y/n): ");
+    printf("Р·Р°РїСѓСЃС‚РёС‚СЊ С‚РµСЃС‚ РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊСЃС‚Рё? (y/n): ");
     scanf(" %c", &answer);
 
     if (answer == 'y' || answer == 'Y')
     {
-        benchmark_sorts(1000, 100);
+        benchmark_sorts(10000, 1000);
     }
 
-    printf("Создать тестовые файлы? (y/n): ");
+    printf("СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»С‹ СЃ С‚РµСЃС‚РѕРІС‹РјРё РґР°РЅРЅС‹РјРё? (y/n): ");
     scanf(" %c", &answer);
 
     if (answer == 'y' || answer == 'Y')
@@ -157,10 +157,10 @@ int main(int argc, char *argv[])
                 }
                 fprintf(file, "\n");
                 fclose(file);
-                printf("Создан файл: %s\n", filename);
+                printf("РЎРѕР·РґР°РЅ С„Р°Р№Р»: %s\n", filename);
             }
         }
-        printf("\nГотово\n");
+        printf("\nРІСЃРµ С„Р°Р№Р»С‹ СЃРѕР·РґР°РЅС‹\n");
     }
 
     free_stack(stack);
