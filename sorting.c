@@ -4,180 +4,203 @@
 #include "sorting.h"
 #include "stack.h"
 
-static void sorted_insert(void *p_container, int element)
+static void sorted_insert_node(void *sorted_stack_void, Node *node_to_insert)
 {
- 
-    if (is_empty_stack(p_container) || element >= top_stack(p_container))
+    Stack *sorted_stack = (Stack*)sorted_stack_void;
+
+    if (sorted_stack->top == NULL || node_to_insert->data <= sorted_stack->top->data)
     {
-        push_back_stack(p_container, element);
+        node_to_insert->prev = sorted_stack->top;
+        sorted_stack->top = node_to_insert;
+        sorted_stack->size++;
         return;
     }
 
+    Node *current = sorted_stack->top;
+    Node *prev_node = NULL;
 
-    int temp = top_stack(p_container);
-    pop_back_stack(p_container);
+    while (current != NULL && node_to_insert->data > current->data)
+    {
+        prev_node = current;
+        current = current->prev;
+    }
 
-    sorted_insert(p_container, element);
-
-    push_back_stack(p_container, temp);
+    node_to_insert->prev = current;
+    if (prev_node != NULL) {
+        prev_node->prev = node_to_insert;
+    }
+    sorted_stack->size++;
 }
 
 void insertion_sort(void *p_container)
 {
-    if (p_container == NULL)
-        return;
+    Stack *stack = (Stack*)p_container;
+    if (stack->size <= 1) return;
 
-    if (get_size_stack(p_container) <= 1)
-        return;
+    void *sorted_stack_void = create_stack();
+    if (!sorted_stack_void) return;
+    Stack *sorted_stack = (Stack*)sorted_stack_void;
 
-    int top = top_stack(p_container);
-    pop_back_stack(p_container);
+    while (stack->top != NULL)
+    {
+        Node *current_node = stack->top;
+        stack->top = current_node->prev;
+        stack->size--;
+        current_node->prev = NULL;
 
-    insertion_sort(p_container);
+        sorted_insert_node(sorted_stack_void, current_node);
+    }
 
-    sorted_insert(p_container, top);
+    stack->top = sorted_stack->top;
+    stack->size = sorted_stack->size;
+
+    free_stack(sorted_stack_void);
 }
 
-static void *merge_two_stacks(void *left, void *right)
-{
-    void *result = create_stack();
-    void *temp = create_stack(); 
-
-    while (!is_empty_stack(left) && !is_empty_stack(right))
-    {
-        if (top_stack(left) <= top_stack(right))
-        {
-            push_back_stack(temp, top_stack(left));
-            pop_back_stack(left);
-        }
-        else
-        {
-            push_back_stack(temp, top_stack(right));
-            pop_back_stack(right);
-        }
+static void split_list(Node *head, Node **left, Node **right) {
+    if (head == NULL || head->prev == NULL) {
+        *left = head;
+        *right = NULL;
+        return;
     }
 
-    while (!is_empty_stack(left))
-    {
-        push_back_stack(temp, top_stack(left));
-        pop_back_stack(left);
+    Node *slow = head;
+    Node *fast = head->prev;
+
+    while (fast != NULL && fast->prev != NULL) {
+        slow = slow->prev;
+        fast = fast->prev->prev;
     }
 
-    while (!is_empty_stack(right))
-    {
-        push_back_stack(temp, top_stack(right));
-        pop_back_stack(right);
-    }
-
-    while (!is_empty_stack(temp))
-    {
-        push_back_stack(result, top_stack(temp));
-        pop_back_stack(temp);
-    }
-
-    free_stack(temp);
-    return result;
+    *left = head;
+    *right = slow->prev;
+    slow->prev = NULL;
 }
 
-static void split_stack(void *p_container, void *left, void *right)
-{
-    int size = get_size_stack(p_container);
-    int half = size / 2;
+static Node* merge_lists(Node *left, Node *right) {
+    if (left == NULL) return right;
+    if (right == NULL) return left;
 
-    void *temp = create_stack();
+    Node dummy;
+    Node *tail = &dummy;
 
-    while (!is_empty_stack(p_container))
-    {
-        push_back_stack(temp, top_stack(p_container));
-        pop_back_stack(p_container);
+    while (left != NULL && right != NULL) {
+        if (left->data <= right->data) {
+            tail->prev = left;
+            left = left->prev;
+        } else {
+            tail->prev = right;
+            right = right->prev;
+        }
+        tail = tail->prev;
     }
 
-    for (int i = 0; i < half; i++)
-    {
-        push_back_stack(left, top_stack(temp));
-        pop_back_stack(temp);
+    if (left != NULL) {
+        tail->prev = left;
+    } else {
+        tail->prev = right;
     }
 
-    while (!is_empty_stack(temp))
-    {
-        push_back_stack(right, top_stack(temp));
-        pop_back_stack(temp);
-    }
-
-    free_stack(temp);
+    return dummy.prev;
 }
 
 void merge_sort(void *p_container)
 {
-    if (p_container == NULL)
+    Stack *stack = (Stack*)p_container;
+    if (stack->size <= 1) return;
+
+    Node *left_head = NULL;
+    Node *right_head = NULL;
+    split_list(stack->top, &left_head, &right_head);
+
+    void *left_stack_void = create_stack();
+    void *right_stack_void = create_stack();
+    if (!left_stack_void || !right_stack_void) {
+        if (left_stack_void) free_stack(left_stack_void);
+        if (right_stack_void) free_stack(right_stack_void);
         return;
-
-    int size = get_size_stack(p_container);
-    if (size <= 1)
-        return;
-
-    void *left = create_stack();
-    void *right = create_stack();
-
-    split_stack(p_container, left, right);
-
-    merge_sort(left);
-    merge_sort(right);
-
-    void *merged = merge_two_stacks(left, right);
-
-    while (!is_empty_stack(merged))
-    {
-        push_back_stack(p_container, top_stack(merged));
-        pop_back_stack(merged);
     }
+    Stack *left_stack = (Stack*)left_stack_void;
+    Stack *right_stack = (Stack*)right_stack_void;
 
-    free_stack(left);
-    free_stack(right);
-    free_stack(merged);
+    int left_size = 0;
+    Node *temp = left_head;
+    while(temp) { left_size++; temp = temp->prev; }
+    int right_size = 0;
+    temp = right_head;
+    while(temp) { right_size++; temp = temp->prev; }
+    left_stack->size = left_size;
+    right_stack->size = right_size;
+
+    left_stack->top = left_head;
+    right_stack->top = right_head;
+
+    merge_sort(left_stack_void);
+    merge_sort(right_stack_void);
+
+    Node *merged_list = merge_lists(left_stack->top, right_stack->top);
+
+    stack->top = merged_list;
+    stack->size = left_size + right_size;
+
+    free_stack(left_stack_void);
+    free_stack(right_stack_void);
 }
 
 void benchmark_sorts(int max_size, int step)
 {
-    srand(12345); 
+    srand(12345);
 
-    printf("Размер данных\tInsertion Sort (мс)\tMerge Sort (мс)\n");
+    printf("Размер данных\tВремя сортировки вставками (мс)\tВремя сортировки слиянием (мс)\n");
 
     for (int size = step; size <= max_size; size += step)
     {
-     
         int *test_data = (int *)malloc(size * sizeof(int));
-        for (int i = 0; i < size; i++)
+        if (!test_data) {
+            fprintf(stderr, "Ошибка выделения памяти для размера %d\n", size);
+            continue;
+        }
+        for (int j = 0; j < size; j++)
         {
-            test_data[i] = rand() % 10000;
+            test_data[j] = rand() % 10000;
         }
 
-        
-        void *stack1 = create_stack();
-        for (int i = 0; i < size; i++)
+        void *stack_ins = create_stack();
+        if (!stack_ins) {
+            fprintf(stderr, "Ошибка создания стека для размера %d (сортировка вставками)\n", size);
+            free(test_data);
+            continue;
+        }
+        for (int j = 0; j < size; j++)
         {
-            push_back_stack(stack1, test_data[i]);
+            push_back_stack(stack_ins, test_data[j]);
         }
 
-        clock_t start = clock();
-        insertion_sort(stack1);
-        clock_t end = clock();
-        double time_insertion = ((double)(end - start) * 1000) / CLOCKS_PER_SEC;
-        free_stack(stack1);
+        clock_t start_ins = clock();
+        insertion_sort(stack_ins);
+        clock_t end_ins = clock();
+        double time_ins = ((double)(end_ins - start_ins) * 1000) / CLOCKS_PER_SEC;
+        free_stack(stack_ins);
 
-        void *stack2 = create_stack();
-        for (int i = 0; i < size; i++)
+        void *stack_mer = create_stack();
+        if (!stack_mer) {
+            fprintf(stderr, "Ошибка создания стека для размера %d (сортировка слиянием)\n", size);
+            free(test_data);
+            continue;
+        }
+        for (int j = 0; j < size; j++)
         {
-            push_back_stack(stack2, test_data[i]);
+            push_back_stack(stack_mer, test_data[j]);
         }
 
-        clock_t start2 = clock();
-        merge_sort(stack2);
-        clock_t end2 = clock();
-        double time_merge = ((double)(end2 - start2) * 1000) / CLOCKS_PER_SEC;
-        free_stack(stack2);
+        clock_t start_mer = clock();
+        merge_sort(stack_mer);
+        clock_t end_mer = clock();
+        double time_mer = ((double)(end_mer - start_mer) * 1000) / CLOCKS_PER_SEC;
+        free_stack(stack_mer);
 
-        printf("%d\t%.3f\t%.3f\n", size, time_insertion, time_merge);
+        printf("%d\t%f\t%f\n", size, time_ins, time_mer);
+
         free(test_data);
     }
 }

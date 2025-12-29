@@ -144,6 +144,7 @@ void *load_stack_from_file(const char *filename)
     return stack;
 }
 
+
 void print_stack(void *p_container)
 {
     if (p_container == NULL)
@@ -161,72 +162,11 @@ void print_stack(void *p_container)
 
     printf("Стек (%d элементов): ", stack->size);
 
-    void *temp = create_stack();
-    Node *current = stack->top;
-
-    while (current != NULL)
+    Node *current = stack->top; 
+    while (current != NULL) 
     {
-        push_back_stack(temp, current->data);
-        current = current->prev;
+        printf("%d ", current->data); 
+        current = current->prev; 
     }
-
-    current = ((Stack *)temp)->top;
-    while (current != NULL)
-    {
-        printf("%d ", current->data);
-        current = current->prev;
-    }
-
-    free_stack(temp);
-    printf("\n");
-}
-
-int *stack_to_array(void *p_container, int *size)
-{
-    if (p_container == NULL)
-    {
-        if (size != NULL)
-            *size = 0;
-        return NULL;
-    }
-
-    Stack *stack = (Stack *)p_container;
-    if (size != NULL)
-        *size = stack->size;
-
-    int *array = (int *)malloc(sizeof(int) * stack->size);
-    if (array == NULL)
-        return NULL;
-
-    void *temp = create_stack();
-    Node *current = stack->top;
-
-    while (current != NULL)
-    {
-        push_back_stack(temp, current->data);
-        current = current->prev;
-    }
-
-    current = ((Stack *)temp)->top;
-    for (int i = 0; i < stack->size && current != NULL; i++)
-    {
-        array[i] = current->data;
-        current = current->prev;
-    }
-
-    free_stack(temp);
-    return array;
-}
-
-void *array_to_stack(int *array, int size)
-{
-    if (array == NULL || size <= 0)
-        return create_stack();
-
-    void *stack = create_stack();
-    for (int i = 0; i < size; i++)
-    {
-        push_back_stack(stack, array[i]);
-    }
-    return stack;
+    printf("\n"); 
 }
