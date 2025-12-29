@@ -81,8 +81,8 @@ static Node* merge_lists(Node *left, Node *right) {
     if (left == NULL) return right;
     if (right == NULL) return left;
 
-    Node dummy;
-    Node *tail = &dummy;
+    Node helper;
+    Node *tail = &helper;
 
     while (left != NULL && right != NULL) {
         if (left->data <= right->data) {
@@ -101,7 +101,7 @@ static Node* merge_lists(Node *left, Node *right) {
         tail->prev = right;
     }
 
-    return dummy.prev;
+    return helper.prev;
 }
 
 void merge_sort(void *p_container)
