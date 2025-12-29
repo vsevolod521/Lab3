@@ -149,11 +149,15 @@ void merge_sort(void *p_container)
 
 void benchmark_sorts(int max_size, int step)
 {
+    int start_size = 3000;
+    step = 1000;
+    max_size = 40000; 
+
     srand(12345);
 
     printf("Размер данных\tВремя сортировки вставками (мс)\tВремя сортировки слиянием (мс)\n");
 
-    for (int size = step; size <= max_size; size += step)
+    for (int size = start_size; size <= max_size; size += step)
     {
         int *test_data = (int *)malloc(size * sizeof(int));
         if (!test_data) {
@@ -167,7 +171,7 @@ void benchmark_sorts(int max_size, int step)
 
         void *stack_ins = create_stack();
         if (!stack_ins) {
-            fprintf(stderr, "Ошибка создания стека для размера %d (сортировка вставками)\n", size);
+            fprintf(stderr, "Ошибка создания стека для размера %d (вставками)\n", size);
             free(test_data);
             continue;
         }
@@ -184,7 +188,7 @@ void benchmark_sorts(int max_size, int step)
 
         void *stack_mer = create_stack();
         if (!stack_mer) {
-            fprintf(stderr, "Ошибка создания стека для размера %d (сортировка слиянием)\n", size);
+            fprintf(stderr, "Ошибка создания стека для размера %d (слиянием)\n", size);
             free(test_data);
             continue;
         }
