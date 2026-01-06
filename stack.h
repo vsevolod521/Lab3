@@ -3,7 +3,7 @@
 
 typedef struct Node
 {
-    int data; 
+    int data;   
     struct Node *prev;
 } Node;
 
@@ -27,10 +27,12 @@ void pop_back(void *);
 void *begin(void *);
 void *next(void *, void *);
 
-void save_to_file(void *, const char *);
+int save_to_file(void *, const char *);
 void *load_from_file(const char *);
 void print(void *);
 
 void full_move(void*, void*);
 void move_single(void*, void*);
 int top(void*);
+
+void* copy(void*);

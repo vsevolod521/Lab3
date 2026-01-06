@@ -3,6 +3,7 @@
 #include <time.h>
 #include "sorting.h"
 #include "stack.h"
+#include "functions.h"
 
 void insertion_sort(void* stack) {
     void* temp = create();
@@ -74,12 +75,14 @@ void merge_sort(void* stack) {
     free_stack(temp);
 }
 
-void benchmark_sorts(int start_size, int max_size, int step) {
+void benchmark_sorts(Parameters parameters, bool from_file) {
     srand(12345);
+
+    char filename[20];
 
     printf("Размер данных\tВремя сортировки вставками (мс)\tВремя сортировки слиянием (мс)\n");
 
-    for (int size = start_size; size <= max_size; size += step) {
+    for (int size = parameters.start_size; size <= parameters.max_size; size += parameters.step) {
 
         void* stack = create();
         if (stack == NULL) {
@@ -87,8 +90,14 @@ void benchmark_sorts(int start_size, int max_size, int step) {
             continue;
         }
 
-        for (int i = 0; i < size; i++)
-            push_back(stack, rand() % 10000);
+        if (!from_file) {
+            for (int i = 0; i < size; i++)
+                push_back(stack, rand() % 10000);
+        } else {
+            sprintf(filename, "test_%d.txt", size);
+            free_stack(stack);
+            stack = load_from_file(filename);
+        }
 
         clock_t start_ins = clock();
         insertion_sort(stack);
@@ -98,8 +107,14 @@ void benchmark_sorts(int start_size, int max_size, int step) {
 
         clear(stack);
 
-        for (int i = 0; i < size; i++)
-            push_back(stack, rand() % 10000);
+        if (!from_file) {
+            for (int i = 0; i < size; i++)
+                push_back(stack, rand() % 10000);
+        } else {
+            sprintf(filename, "test_%d.txt", size);
+            free_stack(stack);
+            stack = load_from_file(filename);
+        }
 
         clock_t start_mer = clock();
         merge_sort(stack);
@@ -109,6 +124,25 @@ void benchmark_sorts(int start_size, int max_size, int step) {
 
         free_stack(stack);
 
-        printf("%d\t%f\t%f\n", size, time_ins, time_mer);
+        printf("%d\t\t%f\t\t\t%f\n", size, time_ins, time_mer);
     }
+}
+
+void* copy(void* source) {
+    if (source == NULL)
+        return NULL;
+
+    void* temp = create();
+    full_move(source, temp);
+    
+    void* destination = create();
+
+    while (!is_empty(temp)) {
+        push_back(source, top(temp));
+        push_back(destination, top(temp));
+        pop_back(temp);
+    }
+    free_stack(temp);
+
+    return destination;
 }

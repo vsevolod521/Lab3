@@ -98,14 +98,14 @@ void pop_back(void* p_container) {
     stack->size--;
 }
 
-void save_to_file(void* p_container, const char* filename) {
+int save_to_file(void* p_container, const char* filename) {
     if (p_container == NULL || filename == NULL)
-        return;
+        return 0;
 
     FILE* file = fopen(filename, "w");
 
     if (file == NULL)
-        return;
+        return 0;
 
     Stack* stack = (Stack*)p_container;
     Node* current = stack->top;
@@ -116,6 +116,7 @@ void save_to_file(void* p_container, const char* filename) {
     }
 
     fclose(file);
+    return 1;
 }
 
 void* load_from_file(const char*    filename) {

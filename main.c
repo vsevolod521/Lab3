@@ -5,164 +5,84 @@
 #include <time.h>
 #include "stack.h"
 #include "sorting.h"
+#include "functions.h"
 #include <locale.h>
-
-static void clear_input_buffer()
-{
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
 
 int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "ru_Ru.UTF-8");
     srand(time(NULL));
 
-    int continue_or_stop = (argc == 1);
+    void* stack = check_parameter_file(argc, argv);
+    void* sorted = NULL;
 
-    do {
-        char* input_file = NULL;
-        for (int i = 1; i < argc; i++)
-            if (strcmp(argv[i], "-file") == 0 && i + 1 < argc) {
-                input_file = argv[i + 1];
-                break;
-            }
+    if (stack != NULL) {
+        sorted = get_sorted_copy(stack);
 
-        if (input_file != NULL) {
-            void* previous = load_from_file(input_file);
-            if (previous != NULL && !is_empty(previous)) {
-                printf("предыдущий введённый ряд '%s'\n", input_file);
-                print(previous);
-
-                void* temp = create();
-                full_move(previous, temp);
-
-                void* sorted_copy = create();
-
-                while (!is_empty(temp)) {
-                    push_back(previous, top(temp));
-                    push_back(sorted_copy, top(temp));
-                    pop_back(temp);
-                }
-                free_stack(temp);
-
-                insertion_sort(sorted_copy);
-
-                printf("\n отсортированный ряд (прямым включением) \n");
-                print(sorted_copy);
-
-                free_stack(previous);
-                free_stack(sorted_copy);
-            } else {
-                printf("файл '%s' не найден или пуст\n", input_file);
-            }
-            printf("\n");
-        }
-
-        puts("введите ряд чисел:");
-
-        void* stack = create();
-        char input[1000];
-
-        if (fgets(input, sizeof(input), stdin) != NULL) {
-            int count = 0;
-
-            char* token = strtok(input, " \t\n");
-            while (token != NULL) {
-                int number = atoi(token);
-                if (token[0] != '0' || number != 0 || strcmp(token, "0") == 0) {
-                    push_back(stack, number);
-                    count++;
-                }
-                token = strtok(NULL, " \t\n");
-            }
-
-            if (count == 0) {
-                printf("вы не ввели все числа. используем тестовый набор:\n");
-                push_back(stack, 34);
-                push_back(stack, 12);
-                push_back(stack, 78);
-                push_back(stack, 5);
-                push_back(stack, 91);
-                push_back(stack, 23);
-            }
-        }
-
-        printf("\nновый ряд чисел:\n");
+        printf("Ряд чисел из файла: ");
         print(stack);
 
-        save_to_file(stack, "input.txt");
+        printf("После сортировки: ");
+        print(sorted);
+    }
 
-        void* insertion_stack = create();
-        void* merge_stack = create();
-
-        void* temp = create();
-        full_move(stack, temp);
-
-        while (!is_empty(temp)) {
-            int val = top(temp);
-            pop_back(temp);
-            push_back(stack, val);
-            push_back(insertion_stack, val);
-            push_back(merge_stack, val);
-        }
-        free_stack(temp);
-
-        printf("\nсортировка прямым включением\n");
-        insertion_sort(insertion_stack);
-        print(insertion_stack);
-        save_to_file(insertion_stack, "sorted.txt");
-
-        printf("\n");
-
-        char answer;
-        printf("запустить тест производительсти? (y/n): ");
-        scanf(" %c", &answer);
-        clear_input_buffer();
-
-        if (answer == 'y' || answer == 'Y') {
-            benchmark_sorts(3000, 40000, 1000);
-        }
-
-        printf("создать файлы с тестовыми данными? (y/n): ");
-        scanf(" %c", &answer);
-        clear_input_buffer();
-
-        if (answer == 'y' || answer == 'Y') {
-            for (int size = 100; size <= 1000; size += 100) {
-                char filename[20];
-                sprintf(filename, "test_%d.txt", size);
-
-                FILE* file = fopen(filename, "w");
-                if (file != NULL) {
-                    for (int i = 0; i < size; i++) {
-                        fprintf(file, "%d ", rand() % 10000);
-                    }
-                    fprintf(file, "\n");
-                    fclose(file);
-                    printf("Создан файл: %s\n", filename);
-                }
+    Parameters parameters;
+    parameters.start_size = -1;
+    
+    int answer = show_menu();
+    
+    while (answer != n_cmds) {
+        if (answer == 1) {
+            if (stack != NULL) {
+                free_stack(stack);
             }
-            printf("\nвсе файлы созданы\n");
-        }
+            stack = input_stack();
+            print(stack);
+            printf("Введён новый ряд чисел!\n");
 
+        } else if (answer == 2) {
+            if (sorted != NULL) {
+                free_stack(sorted);
+                sorted = NULL;
+            }
+            
+            if (stack == NULL) {
+                printf("Нет исходного ряда для сортировки!\n");
+            } else {
+                sorted = get_sorted_copy(stack);
+                printf("Ряд чисел после сортировки: ");
+                print(sorted);
+            }
+
+        } else if (answer == 3) {
+            save(stack);
+
+        } else if (answer == 4) {
+            save(sorted);
+
+        } else if (answer == 5) {
+            Parameters params;
+            params.start_size = 3000;
+            params.max_size = 10000;
+            params.step = 1000;
+            benchmark_sorts(params, false);
+
+        } else if (answer == 6) {
+            if (parameters.start_size == -1)
+                printf("Нет тестовых файлов.\n");
+            else 
+                benchmark_sorts(parameters, true);
+
+        } else if (answer == 7) {
+            parameters = create_test_files();
+        }
+        answer = show_menu();
+    }
+
+    if (stack != NULL)
         free_stack(stack);
-        free_stack(insertion_stack);
-        free_stack(merge_stack);
-
-        if (continue_or_stop) {
-            printf("продолжить? (y/n): ");
-            scanf(" %c", &answer);
-            clear_input_buffer();
-
-            if (answer != 'y' && answer != 'Y') {
-                break;
-            }
-            printf("\n");
-        } else {
-            break;
-        }
-
-    } while (continue_or_stop);
-
+    
+    if (sorted != NULL)
+        free_stack(sorted);
+   
     return 0;
 }
