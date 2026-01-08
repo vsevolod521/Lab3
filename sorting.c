@@ -128,21 +128,4 @@ void benchmark_sorts(Parameters parameters, bool from_file) {
     }
 }
 
-void* copy(void* source) {
-    if (source == NULL)
-        return NULL;
 
-    void* temp = create();
-    full_move(source, temp);
-    
-    void* destination = create();
-
-    while (!is_empty(temp)) {
-        push_back(source, top(temp));
-        push_back(destination, top(temp));
-        pop_back(temp);
-    }
-    free_stack(temp);
-
-    return destination;
-}
