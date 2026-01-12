@@ -5,22 +5,20 @@
 #include "stack.h"
 #include "functions.h"
 
-void insertion_sort(void* stack) {
-    void* temp = create();
-    void* sorted = create();
+void insertion_sort(Stack* stack) {
+    Stack* temp = create();
+    Stack* sorted = create();
 
     while (!is_empty(stack)) {
-        fflush(stdout);
         int current_element = top(stack);
         pop_back(stack);
 
         while (!is_empty(sorted) && top(sorted) > current_element)
             move_single(sorted, temp);
-
         push_back(sorted, current_element);
 
         while (!is_empty(temp))
-            move_single(temp, sorted);
+            move_single(temp, NULL);
     }
 
     full_move(sorted, stack);
@@ -29,8 +27,8 @@ void insertion_sort(void* stack) {
     free_stack(sorted);
 }
 
-static void* merge_sorted_stacks(void* stack1, void* stack2) {
-    void* temp = create();
+static Stack* merge_sorted_stacks(Stack* stack1, Stack* stack2) {
+    Stack* temp = create();
 
     while (!is_empty(stack1) && !is_empty(stack2)) {
         if (top(stack1) <= top(stack2))
@@ -42,7 +40,7 @@ static void* merge_sorted_stacks(void* stack1, void* stack2) {
     full_move(stack1, temp);
     full_move(stack2, temp);
 
-    void* result = create();
+    Stack* result = create();
     full_move(temp, result);
     
     free_stack(temp);
@@ -50,12 +48,12 @@ static void* merge_sorted_stacks(void* stack1, void* stack2) {
     return result;
 }
 
-void merge_sort(void* stack) {
+void merge_sort(Stack* stack) {
     int size = get_size(stack);
     if (size <= 1) 
         return;
 
-    void* right_stack = create();
+    Stack* right_stack = create();
 
     int mid = size / 2;
     for (int i = 0; i < mid; i++)
@@ -64,9 +62,9 @@ void merge_sort(void* stack) {
     merge_sort(right_stack);
     merge_sort(stack);
 
-    void* merged = merge_sorted_stacks(right_stack, stack);
+    Stack* merged = merge_sorted_stacks(right_stack, stack);
     
-    void* temp = create();
+    Stack* temp = create();
     full_move(merged, temp);
     full_move(temp, stack);
 
@@ -84,7 +82,7 @@ void benchmark_sorts(Parameters parameters, bool from_file) {
 
     for (int size = parameters.start_size; size <= parameters.max_size; size += parameters.step) {
 
-        void* stack = create();
+        Stack* stack = create();
         if (stack == NULL) {
             fprintf(stderr, "Ошибка создания стека для размера %d (вставками)\n", size);
             continue;

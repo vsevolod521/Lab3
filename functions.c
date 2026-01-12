@@ -36,7 +36,7 @@ int show_menu() {
     return input_int(1, n_cmds);
 }
 
-void save(void* stack) {
+void save(Stack* stack) {
     if (stack == NULL) {
         printf("Нет ряда чисел для вывода в файл!\n");
         return;
@@ -90,7 +90,7 @@ Parameters create_test_files() {
     return parameters;
 }
 
-void* check_parameter_file(int argc, char* argv[]) {
+Stack* check_parameter_file(int argc, char* argv[]) {
     char* input_file = NULL;
     for (int i = 1; i < argc; i++)
         if (strcmp(argv[i], "-file") == 0 && i + 1 < argc) {
@@ -104,23 +104,23 @@ void* check_parameter_file(int argc, char* argv[]) {
     return load_from_file(input_file);
 }
 
-void* get_sorted_copy(void* stack) {
+Stack* get_sorted_copy(Stack* stack) {
     if (stack == NULL)
         return NULL;
 
-    void* sorted_copy = copy(stack);
+    Stack* sorted_copy = copy(stack);
 
     insertion_sort(sorted_copy);
 
     return sorted_copy;
 }
 
-void* input_stack() {
+Stack* input_stack() {
     puts("Введите ряд чисел в одну строку через пробел: ");
 
     getc(stdin);
 
-    void* temp = create();
+    Stack* temp = create();
 
     char input[1000];
     if (fgets(input, sizeof(input), stdin) == NULL) {
@@ -138,7 +138,7 @@ void* input_stack() {
         token = strtok(NULL, " \t\n");
     }
 
-    void* stack = create();
+    Stack* stack = create();
     full_move(temp, stack);
 
     return stack;

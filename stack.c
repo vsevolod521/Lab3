@@ -18,56 +18,57 @@ void free_node(Node *node)
     free(node);
 }
 
-void* create() {
+Stack* create() {
     Stack* stack = (Stack*)malloc(sizeof(Stack));
 
     if (stack == NULL)
         return NULL;
 
-    stack->size = 0;
     stack->top = NULL;
 
-    return (void*)stack;
+    return stack;
 }
 
-void free_stack(void* p_container) {
-    if (p_container == NULL)
+void free_stack(Stack* stack) {
+    if (stack == NULL)
         return;
 
-    clear(p_container);
+    clear(stack);
 
-    Stack* stack = (Stack*)p_container;
     free(stack);
 }
 
-bool is_empty(void* p_container) {
-    if (p_container == NULL)
+bool is_empty(Stack* stack) {
+    if (stack == NULL)
         return true;
 
-    Stack* stack = (Stack*)p_container;
-    return stack->size == 0;
+    return stack->top == 0;
 }
 
-void clear(void* p_container) {
-    if (p_container == NULL)
+void clear(Stack* stack) {
+    if (stack == NULL)
         return;
-
-    Stack* stack = (Stack*)p_container;
-
     while (stack->top != NULL)
-        pop_back(p_container);
+        pop_back(stack);
 }
 
-int get_size(void* p_container) {
-    if (p_container == NULL)
+int get_size(Stack* stack) {
+    if (stack == NULL)
         return 0;
 
-    Stack* stack = (Stack*)p_container;
-    return stack->size;
+    int size = 0;
+
+    Node* node = stack->top;
+    while (node != NULL) {
+        size++;
+        node = node->prev;
+    }
+    
+    return size;
 }
 
-void push_back(void* p_container, int element) {
-    if (p_container == NULL)
+void push_back(Stack* stack, int element) {
+    if (stack == NULL)
         return;
 
     Node* new_node = create_node(element);
@@ -75,31 +76,25 @@ void push_back(void* p_container, int element) {
     if (new_node == NULL)
         return;
 
-    Stack* stack = (Stack*)p_container;
-
     new_node->prev = stack->top;
     stack->top = new_node;
-    stack->size++;
 }
 
-void pop_back(void* p_container) {
-    if (p_container == NULL)
+void pop_back(Stack* stack) {
+    if (stack == NULL)
         return;
 
-    if (is_empty(p_container))
+    if (is_empty(stack))
         return;
-
-    Stack* stack = (Stack*)p_container;
 
     Node* old_top = stack->top;
     stack->top = old_top->prev;
 
     free(old_top);
-    stack->size--;
 }
 
-int save_to_file(void* p_container, const char* filename) {
-    if (p_container == NULL || filename == NULL)
+int save_to_file(Stack* stack, const char* filename) {
+    if (stack == NULL || filename == NULL)
         return 0;
 
     FILE* file = fopen(filename, "w");
@@ -107,7 +102,6 @@ int save_to_file(void* p_container, const char* filename) {
     if (file == NULL)
         return 0;
 
-    Stack* stack = (Stack*)p_container;
     Node* current = stack->top;
 
     while (current != NULL) {
@@ -119,7 +113,7 @@ int save_to_file(void* p_container, const char* filename) {
     return 1;
 }
 
-void* load_from_file(const char*    filename) {
+Stack* load_from_file(const char* filename) {
     if (filename == NULL)
         return NULL;
 
@@ -128,7 +122,7 @@ void* load_from_file(const char*    filename) {
     if (file == NULL)
         return NULL;
 
-    void* stack = create();
+    Stack* stack = create();
 
     int value;
     while (fscanf(file, "%d", &value) == 1) {
@@ -140,19 +134,18 @@ void* load_from_file(const char*    filename) {
 }
 
 
-void print(void* p_container) {
-    if (p_container == NULL) {
+void print(Stack* stack) {
+    if (stack == NULL) {
         printf("Стек не существует\n");
         return;
     }
 
-    Stack* stack = (Stack*)p_container;
-    if (is_empty(p_container)) {
+    if (is_empty(stack)) {
         printf("Стек пуст\n");
         return;
     }
 
-    printf("Стек (%d элементов): ", stack->size);
+    printf("Стек (%d элементов): ", get_size(stack));
 
     Node* current = stack->top;
     while (current != NULL) {
@@ -162,7 +155,7 @@ void print(void* p_container) {
     printf("\n");
 }
 
-void full_move(void* source, void* destination) {
+void full_move(Stack* source, Stack* destination) {
     if (source == NULL || destination == NULL)
         return;
 
@@ -172,7 +165,7 @@ void full_move(void* source, void* destination) {
     }
 }
 
-void move_single(void* source, void* destination) {
+void move_single(Stack* source, Stack* destination) {
     if (source == NULL || destination == NULL)
         return;
 
@@ -180,22 +173,21 @@ void move_single(void* source, void* destination) {
     pop_back(source);
 }
 
-int top(void* p_container) {
-    if (p_container == NULL || is_empty(p_container))
+int top(Stack* stack) {
+    if (stack == NULL || is_empty(stack))
         return 0;
 
-    Stack* stack = (Stack*)p_container;
     return stack->top->data;
 }
 
-void* copy(void* source) {
+Stack* copy(Stack* source) {
     if (source == NULL)
         return NULL;
 
-    void* temp = create();
+    Stack* temp = create();
     full_move(source, temp);
     
-    void* destination = create();
+    Stack* destination = create();
 
     while (!is_empty(temp)) {
         push_back(source, top(temp));

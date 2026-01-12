@@ -12,13 +12,13 @@ typedef struct Parameters Parameters;
 extern const int n_cmds;
 extern const char* cmds[];
 
-void* check_parameter_file(int , char** );
-void* get_sorted_copy(void* );
+Stack* check_parameter_file(int , char** );
+Stack* get_sorted_copy(Stack* );
 int input_int(int, int);
 int show_menu();    
-void save(void*);
+void save(Stack*);
 
 Parameters create_test_files();
 
-void* input_stack();
+Stack* input_stack();
 void clear_input_buffer(void);

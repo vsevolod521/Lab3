@@ -10,26 +10,25 @@ typedef struct Node
 
 typedef struct Stack
 {
-    int size;
     Node *top;
 } Stack;
 
-void *create();
-void free_stack(void *);
+Stack *create();
+void free_stack(Stack *);
 
-bool is_empty(void *);
-void clear(void *);
-int get_size(void *);
+bool is_empty(Stack *);
+void clear(Stack *);
+int get_size(Stack *);
 
-void push_back(void *, int ); 
-void pop_back(void *);
+void push_back(Stack *, int ); 
+void pop_back(Stack *);
 
-int save_to_file(void *, const char *);
-void *load_from_file(const char *);
-void print(void *);
+int save_to_file(Stack *, const char *);
+Stack* load_from_file(const char *);
+void print(Stack *);
 
-void full_move(void*, void*);
-void move_single(void*, void*);
-int top(void*);
+void full_move(Stack*, Stack*);
+void move_single(Stack*, Stack*);
+int top(Stack*);
 
-void* copy(void*);
+Stack* copy(Stack*);

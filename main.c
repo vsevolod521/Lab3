@@ -12,9 +12,9 @@ int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "ru_Ru.UTF-8");
     srand(time(NULL));
 
-    void* stack = check_parameter_file(argc, argv);
-    void* sorted = NULL;
-
+    Stack* stack = check_parameter_file(argc, argv);
+    Stack* sorted = NULL;
+    
     if (stack != NULL) {
         sorted = get_sorted_copy(stack);
 

@@ -26,11 +26,3 @@ clean:
 
 run: $(TARGET)
 	./$(TARGET)
-
-test_with_file: $(TARGET)
-	./$(TARGET) -file input.txt
-
-benchmark: $(TARGET)
-	./$(TARGET)
-
-.PHONY: all clean run test_with_file benchmark
