@@ -24,5 +24,3 @@ functions.o: functions.c functions.h
 clean:
 	rm -f $(OBJECTS) $(TARGET) *.txt
 
-run: $(TARGET)
-	./$(TARGET)
