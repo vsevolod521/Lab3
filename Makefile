@@ -24,3 +24,4 @@ functions.o: functions.c functions.h
 clean:
 	rm -f $(OBJECTS) $(TARGET) *.txt
 
+.PHONY: all clean 
